@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diwali Tic Tac Toe</title>
+  <style>
+     body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #ff4500, #ffd700, #8b0000);
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+    } 
+
+    .container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 1s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    h1 {
+      color: #8b0000;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    #status {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #ff4500;
+      transition: color 0.3s ease;
+      font-weight: bold;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 10px;
+      background: #2c3e50;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.5em;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: transform 0.2s, background 0.3s;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .cell:hover {
+      transform: scale(1.05);
+      background: #f0f0f0;
+    }
+
+    .cell.x {
+      color: #ff4500;
+      background: #ffe4b5;
+      animation: pop 0.3s ease;
+    }
+
+    .cell.o {
+      color: #ffd700;
+      background: #fffacd;
+      animation: pop 0.3s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    #restart {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      background: #ff8c00;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    #restart:hover {
+      background: #e67e22;
+      transform: translateY(-2px);
+    }
+
+    .win-animation {
+      animation: diwaliSparkle 0.8s infinite alternate;
+      border: 3px solid #ffd700;
+      box-shadow: 0 0 20px #ff4500, 0 0 40px #ffd700;
+    }
+
+    @keyframes diwaliSparkle {
+      0% { background: #ffeb3b; transform: scale(1); box-shadow: 0 0 20px #ff4500; }
+      100% { background: #ff4500; transform: scale(1.1); box-shadow: 0 0 40px #ffd700; }
+    }
+
+    .firecracker {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background: #ffd700;
+      border-radius: 50%;
+      animation: firecrackerBurst 2s ease-out forwards;
+    }
+
+    @keyframes firecrackerBurst {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: translate(var(--dx), var(--dy)) scale(1.5);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(var(--dx), var(--dy)) scale(0);
+        opacity: 0;
+      }
+    }
+ 
+ 
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TIC TAC TOE</h1>
+    <div id="status">Player X's Turn</div>
+    <div id="board"></div>
+    <button id="restart">Restart Game</button>
+  </div>
+
+  <script>
+    const board = document.getElementById('board');
+    const status = document.getElementById('status');
+    const restartBtn = document.getElementById('restart');
+    let currentPlayer = 'X';
+    let gameBoard = ['', '', '', '', '', '', '', '', ''];
+    let gameActive = true;
+
+    function createBoard() {
+      board.innerHTML = '';
+      gameBoard.forEach((_, index) => {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.index = index;
+        cell.addEventListener('click', handleCellClick);
+        board.appendChild(cell);
+      });
+    }
+
+    function handleCellClick(e) {
+      const index = e.target.dataset.index;
+      if (gameBoard[index] === '' && gameActive) {
+        gameBoard[index] = currentPlayer;
+        e.target.textContent = currentPlayer;
+        e.target.classList.add(currentPlayer.toLowerCase());
+        checkWin();
+        if (gameActive) {
+          currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+          status.textContent = `Player ${currentPlayer}'s Turn`;
+        }
+      }
+    }
+
+    function checkWin() {
+      const winPatterns = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], 
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6] 
+      ];
+
+      for (const pattern of winPatterns) {
+        const [a, b, c] = pattern;
+        if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+          gameActive = false;
+          status.textContent = `Player ${currentPlayer} Wins!`;
+          highlightWinningCells(pattern);
+          triggerFirecracker();
+          playDiwaliSound();
+          return;
+        }
+      }
+
+      if (!gameBoard.includes('')) {
+        gameActive = false;
+        status.textContent = "It's a Draw!";
+      }
+    }
+
+    function highlightWinningCells(pattern) {
+      pattern.forEach(index => {
+        board.children[index].classList.add('win-animation');
+      });
+    }
+
+    function triggerFirecracker() {
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      for (let i = 0; i < 200; i++) {
+        const firecracker = document.createElement('div');
+        firecracker.classList.add('firecracker');
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * 200 + 100;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        firecracker.style.left = `${centerX}px`;
+        firecracker.style.top = `${centerY}px`;
+        firecracker.style.setProperty('--dx', `${dx}px`);
+        firecracker.style.setProperty('--dy', `${dy}px`);
+        firecracker.style.background = ['#ffd700', '#ff4500', '#ff8c00', '#b22222', '#ffa500'][Math.floor(Math.random() * 5)];
+        document.body.appendChild(firecracker);
+        setTimeout(() => firecracker.remove(), 2000);
+      }
+    }
+
+    function playDiwaliSound() {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const notes = [
+        { freq: 523.25, duration: 0.2, delay: 0 }, // C5
+        { freq: 659.25, duration: 0.2, delay: 0.2 }, // E5
+        { freq: 783.99, duration: 0.3, delay: 0.4 }, // G5
+        { freq: 1046.50, duration: 0.2, delay: 0.7 } // C6
+      ];
+
+      notes.forEach(note => {
+        const oscillator = audioCtx.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(note.freq, audioCtx.currentTime + note.delay);
+        oscillator.connect(audioCtx.destination);
+        oscillator.start(audioCtx.currentTime + note.delay);
+        oscillator.stop(audioCtx.currentTime + note.delay + note.duration);
+      });
+    }
+
+    function restartGame() {
+      gameBoard = ['', '', '', '', '', '', '', '', ''];
+      currentPlayer = 'X';
+      gameActive = true;
+      status.textContent = `Player ${currentPlayer}'s Turn`;
+      createBoard();
+    }
+
+    restartBtn.addEventListener('click', restartGame);
+    createBoard();
+  </script>
+</body>
+</html>
